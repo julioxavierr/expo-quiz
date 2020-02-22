@@ -34,8 +34,12 @@ const { actions, reducer } = createSlice({
   initialState,
   reducers: {
     add: (state, { payload }: PayloadAction<IQuiz>) => {
-      // redux-toolkit uses immer library
-      state[payload.id] = payload;
+      state[payload.id] = payload; // redux-toolkit uses immer library
+    },
+    finish: (state, { payload }: PayloadAction<string>) => {
+      if (!state[payload]) return;
+
+      state[payload].endDate = Date.now();
     },
     remove: (state, { payload }: PayloadAction<string>) => {
       delete state[payload];

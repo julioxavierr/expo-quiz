@@ -1,4 +1,7 @@
 import { default as reducer, QuizzesActions, IQuiz } from '../quizzes';
+import MockDate from 'mockdate';
+
+MockDate.set('02/22/2020');
 
 const MOCK_ID = 'MOCK_ID';
 const MOCK_QUESTION_ID = 'MOCK_QUESTION_ID';
@@ -29,6 +32,28 @@ describe('quizzes/add', () => {
     const action = QuizzesActions.add(mockQuiz);
 
     expect(reducer({}, action)).toEqual({ [mockQuiz.id]: mockQuiz });
+  });
+});
+
+describe('quizzes/finish', () => {
+  it('should generate an action to finish a quiz', () => {
+    const action = QuizzesActions.finish(mockQuiz.id);
+
+    expect(action.type).toEqual('quizzes/finish');
+    expect(action.payload).toEqual(mockQuiz.id);
+  });
+
+  it('should set an `endDate` for quizz', () => {
+    const action = QuizzesActions.finish(mockQuiz.id);
+
+    const initialState = { [mockQuiz.id]: mockQuiz };
+    const expectedState = {
+      [mockQuiz.id]: {
+        ...mockQuiz,
+        endDate: Date.now(),
+      },
+    };
+    expect(reducer(initialState, action)).toEqual(expectedState);
   });
 });
 
