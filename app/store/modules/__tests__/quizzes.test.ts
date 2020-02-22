@@ -31,3 +31,19 @@ describe('quizzes/add', () => {
     expect(reducer({}, action)).toEqual({ [mockQuiz.id]: mockQuiz });
   });
 });
+
+describe('quizzes/remove', () => {
+  it('should generate an action to remove a quiz', () => {
+    const action = QuizzesActions.remove(mockQuiz.id);
+
+    expect(action.type).toEqual('quizzes/remove');
+    expect(action.payload).toEqual(mockQuiz.id);
+  });
+
+  it('should remove a quiz from the store', () => {
+    const action = QuizzesActions.remove(mockQuiz.id);
+
+    const initialState = { [mockQuiz.id]: mockQuiz };
+    expect(reducer(initialState, action)).toEqual({});
+  });
+});

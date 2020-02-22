@@ -37,6 +37,9 @@ const { actions, reducer } = createSlice({
       // redux-toolkit uses immer library
       state[payload.id] = payload;
     },
+    remove: (state, { payload }: PayloadAction<string>) => {
+      delete state[payload];
+    },
   },
 });
 
