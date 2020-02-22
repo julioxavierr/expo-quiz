@@ -1,3 +1,3 @@
-import useFont from './useFont';
+import useResources from './useResources';
 
-export { useFont };
+export { useResources };
