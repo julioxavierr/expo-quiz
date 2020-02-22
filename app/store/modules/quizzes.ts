@@ -1,18 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+type DifficultyType = 'hard' | 'medium' | 'easy';
+
 interface IQuestion {
   id: string;
-  difficulty: string;
-  question: string;
+  difficulty: DifficultyType;
+  text: string;
   correctAnswer: boolean;
 }
 
-interface IQuiz {
+export interface IQuiz {
   id: string;
-  /** timestamp quiz was finished */
+  /**
+   * timestamp quiz was finished
+   * if null, was not finished yet
+   * */
   endDate: number | null;
   /** quiz has its own difficulty, due that it's possible to have quizzes with random difficulties in the future */
-  difficulty: string;
+  difficulty: DifficultyType | 'random';
   questions: {
     [id: string]: IQuestion;
   };
