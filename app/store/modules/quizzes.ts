@@ -28,9 +28,9 @@ const { actions, reducer } = createSlice({
   name: 'quizzes',
   initialState,
   reducers: {
-    addQuiz: (state, { payload }: PayloadAction<IQuiz>) => {
+    add: (state, { payload }: PayloadAction<IQuiz>) => {
       // redux-toolkit uses immer library
-      state.id = payload;
+      state[payload.id] = payload;
     },
   },
 });
