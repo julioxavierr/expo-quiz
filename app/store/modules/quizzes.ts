@@ -36,6 +36,7 @@ const { actions, reducer } = createSlice({
     add: (state, { payload }: PayloadAction<IQuiz>) => {
       state[payload.id] = payload; // redux-toolkit uses immer library
     },
+    /** set end date of quiz */
     finish: (state, { payload }: PayloadAction<string>) => {
       if (!state[payload]) return;
 
