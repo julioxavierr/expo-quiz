@@ -27,7 +27,11 @@ export interface IQuiz {
 }
 
 interface IQuizzes {
-  [id: string]: IQuiz;
+  isLoading: boolean;
+  error: string | null;
+  quizzesById: {
+    [id: string]: IQuiz;
+  };
 }
 
 const fetchQuiz = createAsyncThunk(
@@ -60,23 +64,39 @@ const fetchQuiz = createAsyncThunk(
   },
 );
 
-const initialState: IQuizzes = {};
+const initialState: IQuizzes = {
+  isLoading: false,
+  error: null,
+  quizzesById: {},
+};
 
 const { actions, reducer } = createSlice({
   name: 'quizzes',
   initialState,
   reducers: {
-    add: (state, { payload }: PayloadAction<IQuiz>) => {
-      state[payload.id] = payload; // redux-toolkit uses immer library
-    },
     /** set end date of quiz */
     finish: (state, { payload }: PayloadAction<string>) => {
       if (!state[payload]) return;
 
-      state[payload].endDate = Date.now();
+      state[payload].endDate = Date.now(); // redux-toolkit uses immer library
     },
     remove: (state, { payload }: PayloadAction<string>) => {
-      delete state[payload];
+      delete state.quizzesById[payload];
+    },
+  },
+  extraReducers: {
+    [fetchQuiz.pending.type]: state => {
+      state.isLoading = true;
+      state.error = null;
+    },
+    [fetchQuiz.fulfilled.type]: (state, { payload }: PayloadAction<IQuiz>) => {
+      state.quizzesById[payload.id] = payload;
+      state.isLoading = false;
+      state.error = null;
+    },
+    [fetchQuiz.rejected.type]: state => {
+      state.isLoading = false;
+      state.error = 'An error ocurred';
     },
   },
 });

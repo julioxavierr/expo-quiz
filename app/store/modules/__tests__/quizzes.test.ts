@@ -52,45 +52,71 @@ describe('fetchQuiz', () => {
 
     const store = mockStore({});
     return store.dispatch(action).then(() => {
-      const [pending, failure] = store.getActions();
+      const [pending, rejected] = store.getActions();
 
       // check types
       expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
-      expect(failure.type).toEqual('quizzes/fetchQuiz/rejected');
+      expect(rejected.type).toEqual('quizzes/fetchQuiz/rejected');
 
-      expect(failure.error.message).toEqual(message);
+      expect(rejected.error.message).toEqual(message);
     });
   });
 
-  it('should emit thunk lifecycle failure actions on invalid response code', async () => {
+  it('should emit thunk lifecycle rejected actions on invalid response code', async () => {
     api.get.mockResolvedValueOnce({ response_code: 2 });
     const action = QuizzesActions.fetchQuiz();
 
     const store = mockStore({});
     return store.dispatch(action).then(() => {
-      const [pending, failure] = store.getActions();
+      const [pending, rejected] = store.getActions();
 
       // check types
       expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
-      expect(failure.type).toEqual('quizzes/fetchQuiz/rejected');
+      expect(rejected.type).toEqual('quizzes/fetchQuiz/rejected');
 
-      expect(failure.error.message).toEqual('An error ocurred.');
+      expect(rejected.error.message).toEqual('An error ocurred.');
     });
   });
-});
 
-describe('quizzes/add', () => {
-  it('should generate an action to add a quiz', () => {
-    const action = QuizzesActions.add(mockQuiz);
+  it('should update store on quizzes/fetchQuiz/pending', async () => {
+    const action = { type: QuizzesActions.fetchQuiz.pending.type };
 
-    expect(action.type).toEqual('quizzes/add');
-    expect(action.payload).toEqual(mockQuiz);
+    const initialState = {
+      isLoading: false,
+      error: 'Something',
+      quizzesById: {},
+    };
+
+    const expectedState = {
+      ...initialState,
+      isLoading: true,
+      error: null,
+    };
+
+    expect(reducer(initialState, action)).toEqual(expectedState);
   });
 
-  it('should add a quizz to store', () => {
-    const action = QuizzesActions.add(mockQuiz);
+  it('should update store on quizzes/fetchQuiz/fulfilled', async () => {
+    const action = {
+      type: QuizzesActions.fetchQuiz.fulfilled.type,
+      payload: mockQuiz,
+    };
 
-    expect(reducer({}, action)).toEqual({ [mockQuiz.id]: mockQuiz });
+    const initialState = {
+      isLoading: true,
+      error: null,
+      quizzesById: {},
+    };
+
+    const expectedState = {
+      isLoading: false,
+      error: null,
+      quizzesById: {
+        [mockQuiz.id]: mockQuiz,
+      },
+    };
+
+    expect(reducer(initialState, action)).toEqual(expectedState);
   });
 });
 
@@ -105,11 +131,24 @@ describe('quizzes/finish', () => {
   it('should set an `endDate` for quizz', () => {
     const action = QuizzesActions.finish(mockQuiz.id);
 
-    const initialState = { [mockQuiz.id]: mockQuiz };
+    const initialState = {
+      isLoading: false,
+      error: null,
+      quizzesById: {
+        [mockQuiz.id]: {
+          ...mockQuiz,
+          endDate: Date.now(),
+        },
+      },
+    };
+
     const expectedState = {
-      [mockQuiz.id]: {
-        ...mockQuiz,
-        endDate: Date.now(),
+      ...initialState,
+      quizzesById: {
+        [mockQuiz.id]: {
+          ...mockQuiz,
+          endDate: Date.now(),
+        },
       },
     };
 
@@ -128,7 +167,19 @@ describe('quizzes/remove', () => {
   it('should remove a quiz from the store', () => {
     const action = QuizzesActions.remove(mockQuiz.id);
 
-    const initialState = { [mockQuiz.id]: mockQuiz };
-    expect(reducer(initialState, action)).toEqual({});
+    const initialState = {
+      isLoading: false,
+      error: null,
+      quizzesById: {
+        [mockQuiz.id]: mockQuiz,
+      },
+    };
+
+    const expectedState = {
+      ...initialState,
+      quizzesById: {},
+    };
+
+    expect(reducer(initialState, action)).toEqual(expectedState);
   });
 });
