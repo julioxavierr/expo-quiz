@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { sample } from 'lodash';
+import { sample, last } from 'lodash';
 import api, { Difficulty, ResponseCode } from 'app/services/api';
+import { RootState } from 'app/store';
+import memoize from 'memoize-state';
 import shortid from 'shortid';
 
 const QUESTIONS_AMOUNT = 10;
@@ -10,6 +12,7 @@ interface IQuestion {
   difficulty: Difficulty;
   text: string;
   correctAnswer: boolean;
+  userAnswer: boolean | null;
 }
 
 export interface IQuiz {
@@ -34,6 +37,36 @@ interface IQuizzes {
   };
 }
 
+// SELECTORS
+
+type CurrentType = { quizId: string; questionId: string } | null;
+const getCurrent = ({ quizzes }: RootState): CurrentType => {
+  const { quizzesById } = quizzes;
+
+  const lastQuizId = last(Object.keys(quizzesById));
+
+  if (!lastQuizId) return null;
+
+  const questionsIds = Object.keys(quizzesById[lastQuizId].questions);
+
+  const pendingQuestionId = questionsIds.find(questionId => {
+    return !quizzesById[lastQuizId].questions[questionId].userAnswer;
+  });
+
+  if (!pendingQuestionId) return null;
+
+  return { quizId: lastQuizId, questionId: pendingQuestionId };
+};
+
+const getCurrentMemoized = memoize(getCurrent);
+
+export const QuizzesSelectors = {
+  getCurrent,
+  getCurrentMemoized,
+};
+
+// ACTIONS
+
 const fetchQuiz = createAsyncThunk(
   'quizzes/fetchQuiz',
   async (): Promise<IQuiz> => {
@@ -46,7 +79,7 @@ const fetchQuiz = createAsyncThunk(
 
     const response = await api.get('', { params });
 
-    if (response.response_code !== ResponseCode.Success) {
+    if (response?.response_code !== ResponseCode.Success) {
       throw new Error('An error ocurred.');
     }
 
@@ -59,10 +92,13 @@ const fetchQuiz = createAsyncThunk(
         difficulty: question.difficulty,
         text: question.question,
         correctAnswer: question.correct_answer === 'True',
+        userAnswer: null,
       })),
     };
   },
 );
+
+// SLICE
 
 const initialState: IQuizzes = {
   isLoading: false,
@@ -74,14 +110,24 @@ const { actions, reducer } = createSlice({
   name: 'quizzes',
   initialState,
   reducers: {
-    /** set end date of quiz */
-    finish: (state, { payload }: PayloadAction<string>) => {
-      if (!state[payload]) return;
-
-      state[payload].endDate = Date.now(); // redux-toolkit uses immer library
-    },
     remove: (state, { payload }: PayloadAction<string>) => {
       delete state.quizzesById[payload];
+    },
+    answerQuestion: (state, { payload }: PayloadAction<boolean>) => {
+      const current = getCurrent({ quizzes: state });
+      if (!current) return;
+
+      const { quizId, questionId } = current;
+      const questions = state.quizzesById[quizId].questions;
+
+      const lastQuestionId = last(Object.keys(questions));
+
+      questions[questionId].userAnswer = payload;
+
+      // if it's the last question, set an endDate
+      if (questionId === lastQuestionId) {
+        state.quizzesById[quizId].endDate = Date.now();
+      }
     },
   },
   extraReducers: {
@@ -90,6 +136,10 @@ const { actions, reducer } = createSlice({
       state.error = null;
     },
     [fetchQuiz.fulfilled.type]: (state, { payload }: PayloadAction<IQuiz>) => {
+      // only allow one active quiz
+      const current = getCurrent({ quizzes: state });
+      if (current) return;
+
       state.quizzesById[payload.id] = payload;
       state.isLoading = false;
       state.error = null;
