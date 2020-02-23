@@ -35,7 +35,7 @@ const getCurrentQuiz = ({ quizzes }: Partial<RootState>): IQuiz | null => {
 
   const lastQuizId = last(Object.keys(quizzesById));
 
-  if (!lastQuizId) return null;
+  if (!lastQuizId || quizzesById[lastQuizId].endDate) return null;
 
   return quizzesById[lastQuizId];
 };
