@@ -13,6 +13,9 @@ type Props = {
   children: React.ReactNode;
 };
 
+/**
+ * Screen container
+ */
 const Container = ({ children }: Props) => {
   const height = useHeaderHeight();
 
@@ -22,6 +25,8 @@ const Container = ({ children }: Props) => {
       flex={1}
       pt={height}
       colors={colors.backgroundColor}
+      start={[0, -0.3]}
+      end={[0.8, 0.7]}
     >
       <SafeWrapper>{children}</SafeWrapper>
     </Flex>
