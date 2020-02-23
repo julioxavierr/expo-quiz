@@ -1,9 +1,29 @@
+import 'react-native-gesture-handler';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'react-native';
 import { Provider } from 'react-redux';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { useResources } from 'app/hooks';
 import store from 'app/store';
-import Fonts from './assets/fonts';
+import { HomeScreen, QuizScreen, ResultScreen } from 'app/components/screens';
+import ROUTES, { RootStackParamList } from 'app/config/routes';
+
+const Stack = createStackNavigator<RootStackParamList>();
+
+const stackOptions = {
+  title: null,
+  headerTransparent: true,
+  headerTintColor: 'white',
+};
+
+const MainStack = () => (
+  <Stack.Navigator initialRouteName={ROUTES.HOME} screenOptions={stackOptions}>
+    <Stack.Screen name={ROUTES.HOME} component={HomeScreen} />
+    <Stack.Screen name={ROUTES.QUIZ} component={QuizScreen} />
+    <Stack.Screen name={ROUTES.RESULT} component={ResultScreen} />
+  </Stack.Navigator>
+);
 
 export default function App() {
   const isLoadingResources = useResources();
@@ -12,20 +32,10 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <View style={styles.container}>
-        <Text style={{ fontFamily: Fonts.CIRCULAR_STD_BOLD }}>
-          Open up App.tsx to start working on your app!
-        </Text>
-      </View>
+      <StatusBar barStyle="dark-content" />
+      <NavigationContainer>
+        <MainStack />
+      </NavigationContainer>
     </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
