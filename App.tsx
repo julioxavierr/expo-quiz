@@ -8,13 +8,14 @@ import { useResources } from 'app/hooks';
 import store from 'app/store';
 import { HomeScreen, QuizScreen, ResultScreen } from 'app/components/screens';
 import ROUTES, { RootStackParamList } from 'app/config/routes';
+import { colors } from 'app/config/theme';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const stackOptions = {
   title: null,
   headerTransparent: true,
-  headerTintColor: 'white',
+  headerTintColor: colors.headerContent,
 };
 
 const MainStack = () => (
