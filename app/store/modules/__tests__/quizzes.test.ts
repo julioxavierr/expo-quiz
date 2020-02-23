@@ -22,10 +22,11 @@ describe('fetchQuiz', () => {
 
     const store = mockStore({});
     return store.dispatch(action).then(() => {
-      const [pending, fulfilled] = store.getActions();
+      const [pending, addGroup, fulfilled] = store.getActions();
 
       // check types
       expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
+      expect(addGroup.type).toEqual('questions/addGroup');
       expect(fulfilled.type).toEqual('quizzes/fetchQuiz/fulfilled');
 
       // shallow test
@@ -48,7 +49,7 @@ describe('fetchQuiz', () => {
       expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
       expect(rejected.type).toEqual('quizzes/fetchQuiz/rejected');
 
-      expect(rejected.error.message).toEqual(message);
+      expect(rejected.payload.message).toEqual(message);
     });
   });
 
@@ -64,12 +65,12 @@ describe('fetchQuiz', () => {
       expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
       expect(rejected.type).toEqual('quizzes/fetchQuiz/rejected');
 
-      expect(rejected.error.message).toEqual('An error ocurred.');
+      expect(rejected.payload.message).toEqual('An error ocurred.');
     });
   });
 
   it('should update store on quizzes/fetchQuiz/pending', async () => {
-    const action = { type: QuizzesActions.fetchQuiz.pending.type };
+    const action = { type: 'quizzes/fetchQuiz/pending' };
 
     const initialState = {
       isLoading: false,
@@ -88,7 +89,7 @@ describe('fetchQuiz', () => {
 
   it('should update store on quizzes/fetchQuiz/fulfilled', async () => {
     const action = {
-      type: QuizzesActions.fetchQuiz.fulfilled.type,
+      type: 'quizzes/fetchQuiz/fulfilled',
       payload: mockQuiz,
     };
 

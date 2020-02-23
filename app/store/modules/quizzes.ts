@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
 import { sample, last } from 'lodash';
 import api, { Difficulty, ResponseCode } from 'app/services/api';
 import { RootState } from 'app/store';
@@ -49,40 +49,54 @@ export const QuizzesSelectors = {
 
 // ACTIONS
 
-const fetchQuiz = createAsyncThunk(
-  'quizzes/fetchQuiz',
-  async (): Promise<IQuiz> => {
-    // pick one difficulty randomly
-    const difficulty = sample(Object.values(Difficulty));
-    const params = {
-      amount: QUESTIONS_AMOUNT,
-      type: 'boolean',
-    };
+// TODO: replace by `createAsyncAction` when it's stable
+// see: https://github.com/reduxjs/redux-toolkit/issues/389
+const fetchQuizPending = createAction('quizzes/fetchQuiz/pending');
+const fetchQuizFulfilled = createAction<IQuiz>('quizzes/fetchQuiz/fulfilled');
+const fetchQuizRejected = createAction<Error>('quizzes/fetchQuiz/rejected');
 
-    const response = await api.get('', { params });
+const fetchQuiz = () => async dispatch => {
+  dispatch(fetchQuizPending());
+
+  // pick one difficulty randomly
+  const difficulty = sample(Object.values(Difficulty));
+  const params = {
+    amount: QUESTIONS_AMOUNT,
+    type: 'boolean',
+  };
+
+  let response;
+
+  try {
+    response = await api.get('', { params });
 
     if (response?.response_code !== ResponseCode.Success) {
       throw new Error('An error ocurred.');
     }
+  } catch (error) {
+    dispatch(fetchQuizRejected(error));
+    return;
+  }
 
-    const questions = response.results.map(question => ({
-      id: shortid.generate(),
-      difficulty: question.difficulty,
-      text: question.question,
-      correctAnswer: question.correct_answer === 'True',
-      userAnswer: null,
-    }));
+  // create and dispatch questions
+  const questions = response.results.map(question => ({
+    id: shortid.generate(),
+    difficulty: question.difficulty,
+    text: question.question,
+    correctAnswer: question.correct_answer === 'True',
+    userAnswer: null,
+  }));
+  dispatch(QuestionsActions.addGroup(questions));
 
-    QuestionsActions.addGroup(questions);
-
-    return {
-      id: shortid.generate(),
-      endDate: null,
-      difficulty,
-      questionsIds: questions.map(({ id }) => id),
-    };
-  },
-);
+  // create and dispatch quiz
+  const quiz = {
+    id: shortid.generate(),
+    endDate: null,
+    difficulty,
+    questionsIds: questions.map(({ id }) => id),
+  };
+  dispatch(fetchQuizFulfilled(quiz));
+};
 
 // SLICE
 
@@ -101,11 +115,11 @@ const { actions, reducer } = createSlice({
     },
   },
   extraReducers: {
-    [fetchQuiz.pending.type]: state => {
+    [fetchQuizPending.type]: state => {
       state.isLoading = true;
       state.error = null;
     },
-    [fetchQuiz.fulfilled.type]: (state, { payload }: PayloadAction<IQuiz>) => {
+    [fetchQuizFulfilled.type]: (state, { payload }: PayloadAction<IQuiz>) => {
       // only allow one active quiz
       const current = getCurrentQuiz({ quizzes: state });
       if (current) return;
@@ -114,7 +128,7 @@ const { actions, reducer } = createSlice({
       state.isLoading = false;
       state.error = null;
     },
-    [fetchQuiz.rejected.type]: state => {
+    [fetchQuizRejected.type]: state => {
       state.isLoading = false;
       state.error = 'An error ocurred';
     },
