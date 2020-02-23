@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
 import { sample, last } from 'lodash';
-import api, { Difficulty, ResponseCode } from 'app/services/api';
-import { RootState } from 'app/store';
 import memoize from 'memoize-state';
 import shortid from 'shortid';
+import api, { Difficulty, ResponseCode } from 'app/services/api';
+import texts from 'app/config/texts';
+import { RootState } from 'app/store';
 import { QuestionsActions, AnswerQuestionPayload } from './questions';
 
 const QUESTIONS_AMOUNT = 10;
@@ -35,7 +36,7 @@ const getCurrentQuiz = ({ quizzes }: Partial<RootState>): IQuiz | null => {
 
   const lastQuizId = last(Object.keys(quizzesById));
 
-  if (!lastQuizId) return null;
+  if (!lastQuizId || quizzesById[lastQuizId].endDate) return null;
 
   return quizzesById[lastQuizId];
 };
@@ -71,7 +72,7 @@ const fetchQuiz = () => async dispatch => {
     response = await api.get('', { params });
 
     if (response?.response_code !== ResponseCode.Success) {
-      throw new Error('An error ocurred.');
+      throw new Error(texts.shared.generalError);
     }
   } catch (error) {
     dispatch(fetchQuizRejected(error));
@@ -130,7 +131,7 @@ const { actions, reducer } = createSlice({
     },
     [fetchQuizRejected.type]: state => {
       state.isLoading = false;
-      state.error = 'An error ocurred';
+      state.error = texts.shared.generalError;
     },
     [QuestionsActions.answerQuestion.type]: (
       state,
