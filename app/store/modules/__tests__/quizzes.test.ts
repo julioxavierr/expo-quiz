@@ -1,7 +1,9 @@
 import { default as reducer, QuizzesActions, IQuiz } from '../quizzes';
-import MockDate from 'mockdate';
+import mockStore from 'app/test/utils/mockStore';
+import api, { Difficulty } from 'app/services/api';
+import mockApiResponse from './mockApiResponse.json';
 
-MockDate.set('02/22/2020');
+jest.mock('app/services/api');
 
 const MOCK_ID = 'MOCK_ID';
 const MOCK_QUESTION_ID = 'MOCK_QUESTION_ID';
@@ -9,50 +11,101 @@ const MOCK_QUESTION_ID = 'MOCK_QUESTION_ID';
 const mockQuiz: IQuiz = {
   id: MOCK_ID,
   endDate: null,
-  difficulty: 'hard',
-  questions: {
-    MOCK_QUESTION_ID: {
-      id: MOCK_QUESTION_ID,
-      difficulty: 'hard',
-      text: 'MOCK_TEXT',
-      correctAnswer: true,
-    },
-  },
+  difficulty: Difficulty.Hard,
+  questionsIds: [MOCK_QUESTION_ID],
 };
 
-describe('quizzes/add', () => {
-  it('should generate an action to add a quiz', () => {
-    const action = QuizzesActions.add(mockQuiz);
+describe('fetchQuiz', () => {
+  it('should emit thunk lifecycle success actions', async () => {
+    api.get.mockResolvedValueOnce(mockApiResponse);
+    const action = QuizzesActions.fetchQuiz();
 
-    expect(action.type).toEqual('quizzes/add');
-    expect(action.payload).toEqual(mockQuiz);
+    const store = mockStore({});
+    return store.dispatch(action).then(() => {
+      const [pending, fulfilled] = store.getActions();
+
+      // check types
+      expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
+      expect(fulfilled.type).toEqual('quizzes/fetchQuiz/fulfilled');
+
+      // shallow test
+      // TODO: match response parsed
+      expect(!!fulfilled.payload).toBeTruthy();
+    });
   });
 
-  it('should add a quizz to store', () => {
-    const action = QuizzesActions.add(mockQuiz);
+  it('should emit thunk lifecycle failure actions', async () => {
+    const message = 'Mock error in API';
+    api.get.mockRejectedValueOnce(new Error(message));
 
-    expect(reducer({}, action)).toEqual({ [mockQuiz.id]: mockQuiz });
+    const action = QuizzesActions.fetchQuiz();
+
+    const store = mockStore({});
+    return store.dispatch(action).then(() => {
+      const [pending, rejected] = store.getActions();
+
+      // check types
+      expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
+      expect(rejected.type).toEqual('quizzes/fetchQuiz/rejected');
+
+      expect(rejected.error.message).toEqual(message);
+    });
   });
-});
 
-describe('quizzes/finish', () => {
-  it('should generate an action to finish a quiz', () => {
-    const action = QuizzesActions.finish(mockQuiz.id);
+  it('should emit thunk lifecycle rejected actions on invalid response code', async () => {
+    api.get.mockResolvedValueOnce({ response_code: 2 });
+    const action = QuizzesActions.fetchQuiz();
 
-    expect(action.type).toEqual('quizzes/finish');
-    expect(action.payload).toEqual(mockQuiz.id);
+    const store = mockStore({});
+    return store.dispatch(action).then(() => {
+      const [pending, rejected] = store.getActions();
+
+      // check types
+      expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
+      expect(rejected.type).toEqual('quizzes/fetchQuiz/rejected');
+
+      expect(rejected.error.message).toEqual('An error ocurred.');
+    });
   });
 
-  it('should set an `endDate` for quizz', () => {
-    const action = QuizzesActions.finish(mockQuiz.id);
+  it('should update store on quizzes/fetchQuiz/pending', async () => {
+    const action = { type: QuizzesActions.fetchQuiz.pending.type };
 
-    const initialState = { [mockQuiz.id]: mockQuiz };
+    const initialState = {
+      isLoading: false,
+      error: 'Something',
+      quizzesById: {},
+    };
+
     const expectedState = {
-      [mockQuiz.id]: {
-        ...mockQuiz,
-        endDate: Date.now(),
+      ...initialState,
+      isLoading: true,
+      error: null,
+    };
+
+    expect(reducer(initialState, action)).toEqual(expectedState);
+  });
+
+  it('should update store on quizzes/fetchQuiz/fulfilled', async () => {
+    const action = {
+      type: QuizzesActions.fetchQuiz.fulfilled.type,
+      payload: mockQuiz,
+    };
+
+    const initialState = {
+      isLoading: true,
+      error: null,
+      quizzesById: {},
+    };
+
+    const expectedState = {
+      isLoading: false,
+      error: null,
+      quizzesById: {
+        [mockQuiz.id]: mockQuiz,
       },
     };
+
     expect(reducer(initialState, action)).toEqual(expectedState);
   });
 });
@@ -68,7 +121,19 @@ describe('quizzes/remove', () => {
   it('should remove a quiz from the store', () => {
     const action = QuizzesActions.remove(mockQuiz.id);
 
-    const initialState = { [mockQuiz.id]: mockQuiz };
-    expect(reducer(initialState, action)).toEqual({});
+    const initialState = {
+      isLoading: false,
+      error: null,
+      quizzesById: {
+        [mockQuiz.id]: mockQuiz,
+      },
+    };
+
+    const expectedState = {
+      ...initialState,
+      quizzesById: {},
+    };
+
+    expect(reducer(initialState, action)).toEqual(expectedState);
   });
 });
