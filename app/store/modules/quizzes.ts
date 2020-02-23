@@ -4,16 +4,9 @@ import api, { Difficulty, ResponseCode } from 'app/services/api';
 import { RootState } from 'app/store';
 import memoize from 'memoize-state';
 import shortid from 'shortid';
+import { QuestionsActions, AnswerQuestionPayload } from './questions';
 
 const QUESTIONS_AMOUNT = 10;
-
-interface IQuestion {
-  id: string;
-  difficulty: Difficulty;
-  text: string;
-  correctAnswer: boolean;
-  userAnswer: boolean | null;
-}
 
 export interface IQuiz {
   id: string;
@@ -24,9 +17,7 @@ export interface IQuiz {
   endDate: number | null;
   /** quiz has its own difficulty, due that it's possible to have quizzes with random difficulties in the future */
   difficulty: Difficulty | 'random';
-  questions: {
-    [id: string]: IQuestion;
-  };
+  questionsIds: [string];
 }
 
 interface IQuizzes {
@@ -39,30 +30,21 @@ interface IQuizzes {
 
 // SELECTORS
 
-type CurrentType = { quizId: string; questionId: string } | null;
-const getCurrent = ({ quizzes }: RootState): CurrentType => {
+const getCurrentQuiz = ({ quizzes }: Partial<RootState>): IQuiz | null => {
   const { quizzesById } = quizzes;
 
   const lastQuizId = last(Object.keys(quizzesById));
 
   if (!lastQuizId) return null;
 
-  const questionsIds = Object.keys(quizzesById[lastQuizId].questions);
-
-  const pendingQuestionId = questionsIds.find(questionId => {
-    return !quizzesById[lastQuizId].questions[questionId].userAnswer;
-  });
-
-  if (!pendingQuestionId) return null;
-
-  return { quizId: lastQuizId, questionId: pendingQuestionId };
+  return quizzesById[lastQuizId];
 };
 
-const getCurrentMemoized = memoize(getCurrent);
+const getCurrentQuizMemoized = memoize(getCurrentQuiz);
 
 export const QuizzesSelectors = {
-  getCurrent,
-  getCurrentMemoized,
+  getCurrentQuiz,
+  getCurrentQuizMemoized,
 };
 
 // ACTIONS
@@ -83,17 +65,21 @@ const fetchQuiz = createAsyncThunk(
       throw new Error('An error ocurred.');
     }
 
+    const questions = response.results.map(question => ({
+      id: shortid.generate(),
+      difficulty: question.difficulty,
+      text: question.question,
+      correctAnswer: question.correct_answer === 'True',
+      userAnswer: null,
+    }));
+
+    QuestionsActions.addGroup(questions);
+
     return {
       id: shortid.generate(),
       endDate: null,
       difficulty,
-      questions: response.results.map(question => ({
-        id: shortid.generate(),
-        difficulty: question.difficulty,
-        text: question.question,
-        correctAnswer: question.correct_answer === 'True',
-        userAnswer: null,
-      })),
+      questionsIds: questions.map(({ id }) => id),
     };
   },
 );
@@ -113,22 +99,6 @@ const { actions, reducer } = createSlice({
     remove: (state, { payload }: PayloadAction<string>) => {
       delete state.quizzesById[payload];
     },
-    answerQuestion: (state, { payload }: PayloadAction<boolean>) => {
-      const current = getCurrent({ quizzes: state });
-      if (!current) return;
-
-      const { quizId, questionId } = current;
-      const questions = state.quizzesById[quizId].questions;
-
-      const lastQuestionId = last(Object.keys(questions));
-
-      questions[questionId].userAnswer = payload;
-
-      // if it's the last question, set an endDate
-      if (questionId === lastQuestionId) {
-        state.quizzesById[quizId].endDate = Date.now();
-      }
-    },
   },
   extraReducers: {
     [fetchQuiz.pending.type]: state => {
@@ -137,7 +107,7 @@ const { actions, reducer } = createSlice({
     },
     [fetchQuiz.fulfilled.type]: (state, { payload }: PayloadAction<IQuiz>) => {
       // only allow one active quiz
-      const current = getCurrent({ quizzes: state });
+      const current = getCurrentQuiz({ quizzes: state });
       if (current) return;
 
       state.quizzesById[payload.id] = payload;
@@ -147,6 +117,21 @@ const { actions, reducer } = createSlice({
     [fetchQuiz.rejected.type]: state => {
       state.isLoading = false;
       state.error = 'An error ocurred';
+    },
+    [QuestionsActions.answerQuestion.type]: (
+      state,
+      { payload }: PayloadAction<AnswerQuestionPayload>,
+    ) => {
+      const { questionId, date } = payload;
+
+      const current = getCurrentQuiz({ quizzes: state });
+      if (!current) return;
+
+      const lastQuestionId = last(state.quizzesById[current.id].questionsIds);
+
+      if (questionId === lastQuestionId) {
+        state.quizzesById[current.id].endDate = date;
+      }
     },
   },
 });
