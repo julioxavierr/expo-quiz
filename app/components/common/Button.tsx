@@ -35,7 +35,7 @@ const Button = ({
 }: Props) => {
   return (
     <Touchable backgroundColor={backgroundColor} px="30px" py="10px" {...props}>
-      <Text textColor={textColor}>{children}</Text>
+      <Text color={textColor}>{children}</Text>
     </Touchable>
   );
 };
