@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, Button } from 'react-native';
+import { Text, Button } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import ROUTES, { RootStackParamList } from 'app/config/routes';
+import { Container } from 'app/components/common';
 
 type ResultScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -14,13 +15,13 @@ type Props = {
 
 const QuizScreen = ({ navigation }: Props) => {
   return (
-    <View>
+    <Container>
       <Text>Quiz</Text>
       <Button
         title="Result"
         onPress={() => navigation.navigate(ROUTES.RESULT)}
       />
-    </View>
+    </Container>
   );
 };
 

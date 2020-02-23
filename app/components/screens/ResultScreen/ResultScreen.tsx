@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, Button } from 'react-native';
+import { Text, Button } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from 'app/config/routes';
+import { Container } from 'app/components/common';
 
 type ResultScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -14,10 +15,10 @@ type Props = {
 
 const ResultScreen = ({ navigation }: Props) => {
   return (
-    <View>
+    <Container>
       <Text>Result</Text>
       <Button title="Home" onPress={() => navigation.popToTop()} />
-    </View>
+    </Container>
   );
 };
 
