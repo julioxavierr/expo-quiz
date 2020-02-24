@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import {} from 'styled-system';
 import { colors } from 'app/config/theme';
 import { Flex, Badge, Text } from 'app/components/common';
 

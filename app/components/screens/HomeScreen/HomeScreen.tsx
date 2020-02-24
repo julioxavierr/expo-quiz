@@ -16,6 +16,8 @@ type Props = {
 };
 
 const HomeScreen = ({ navigation }: Props) => {
+  const current = true;
+
   return (
     <Container>
       <Flex flex={1} pb="30px">
@@ -24,7 +26,7 @@ const HomeScreen = ({ navigation }: Props) => {
             {texts.home.welcome}
           </Text>
           <Text color={colors.text.white} opacity={0.6} mt="10px">
-            {texts.home.startQuestion}
+            {current ? texts.home.continueQuestion : texts.home.startQuestion}
           </Text>
           <Button
             onPress={() => navigation.navigate(ROUTES.QUIZ)}

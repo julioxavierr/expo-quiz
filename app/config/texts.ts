@@ -13,7 +13,8 @@ const texts = {
   },
   home: {
     welcome: 'Welcome,',
-    startQuestion: 'Ready for a quiz? Press start\n and be challenged!',
+    startQuestion: 'Ready for a quiz? Press start\nand be challenged!',
+    continueQuestion: 'You have a quiz in progress, do you want\nto continue?',
     start: 'Start',
     scored: 'You scored',
   },
