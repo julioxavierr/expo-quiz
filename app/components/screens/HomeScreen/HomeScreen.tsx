@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StackNavigationProp } from '@react-navigation/stack';
 import ROUTES, { RootStackParamList } from 'app/config/routes';
 import { Flex, Container, Text, Button } from 'app/components/common';
 import { colors } from 'app/config/theme';
 import texts from 'app/config/texts';
 import QuizFlatList from './components/QuizFlatList';
+import { useTypedSelector } from 'app/hooks';
+import { useDispatch } from 'react-redux';
+import { QuizzesSelectors, QuestionsSelectors } from 'app/store/selectors';
+import { QuizzesActions } from 'app/store/actions';
 
 type ResultScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -16,7 +20,18 @@ type Props = {
 };
 
 const HomeScreen = ({ navigation }: Props) => {
-  const current = true;
+  const current = useTypedSelector(QuizzesSelectors.getCurrentQuiz);
+  const isInProgress = useTypedSelector(state =>
+    QuestionsSelectors.getQuizHasAnsweredQuestion(state, current?.id),
+  );
+  const dispatch = useDispatch();
+
+  /**
+   * Pre-fetch next quiz
+   */
+  useEffect(() => {
+    dispatch(QuizzesActions.fetchQuiz());
+  }, [dispatch]);
 
   return (
     <Container>
@@ -26,7 +41,9 @@ const HomeScreen = ({ navigation }: Props) => {
             {texts.home.welcome}
           </Text>
           <Text color={colors.text.white} opacity={0.6} mt="10px">
-            {current ? texts.home.continueQuestion : texts.home.startQuestion}
+            {current && isInProgress
+              ? texts.home.continueQuestion
+              : texts.home.startQuestion}
           </Text>
           <Button
             onPress={() => navigation.navigate(ROUTES.QUIZ)}
