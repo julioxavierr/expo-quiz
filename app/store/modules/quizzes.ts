@@ -106,6 +106,7 @@ const fetchQuiz = () => async (dispatch, getState) => {
   // create and dispatch questions
   const questions = response.data.results.map(question => ({
     id: shortid.generate(),
+    category: question.category,
     difficulty: question.difficulty,
     text: he.decode(question.question),
     correctAnswer: question.correct_answer === 'True',

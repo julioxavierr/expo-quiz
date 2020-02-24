@@ -6,6 +6,7 @@ import memoize from 'memoize-state';
 
 interface IQuestion {
   id: string;
+  category: string;
   difficulty: Difficulty;
   text: string;
   correctAnswer: boolean;

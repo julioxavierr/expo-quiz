@@ -4,6 +4,7 @@ import { QuestionsActions } from '../questions';
 
 const mockQuestionA = {
   id: 'ID_A',
+  category: 'MOCK_CATEGORY',
   difficulty: Difficulty.Hard,
   text: 'MOCK_TEXT',
   correctAnswer: true,
@@ -12,6 +13,7 @@ const mockQuestionA = {
 
 const mockQuestionB = {
   id: 'ID_B',
+  category: 'MOCK_CATEGORY',
   difficulty: Difficulty.Hard,
   text: 'MOCK_TEXT',
   correctAnswer: true,
