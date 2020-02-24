@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as Font from 'expo-font';
 import { SplashScreen } from 'expo';
-import Fonts from '../../assets/fonts';
+import FONT_NAMES from 'app/config/fonts';
 
 /**
  * Load and use resources that need to be loaded async by Expo SDK
@@ -18,8 +18,8 @@ const useResources = () => {
     const loadFonts = async () => {
       try {
         await Font.loadAsync({
-          [Fonts.CIRCULAR_STD_BOLD]: require('../../assets/fonts/CircularStd-Bold.ttf'),
-          [Fonts.CIRCULAR_STD_MEDIUM]: require('../../assets/fonts/CircularStd-Medium.ttf'),
+          [FONT_NAMES.CIRCULAR_STD_BOLD]: require('../../assets/fonts/CircularStd-Bold.ttf'),
+          [FONT_NAMES.CIRCULAR_STD_MEDIUM]: require('../../assets/fonts/CircularStd-Medium.ttf'),
         });
 
         setIsLoading(false);
