@@ -2,6 +2,8 @@
 
 A trivia game made w/ React Native, Expo and modern Redux.
 
+<img src="https://user-images.githubusercontent.com/14119096/75169511-748ce600-5707-11ea-9e5e-4045d74ef018.gif" width="250" />
+
 ### Project Kanban
 
 Review public project kanban on [Trello](https://trello.com/b/9mg0ODCB/expo-quiz).
