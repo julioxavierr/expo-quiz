@@ -24,6 +24,13 @@ export type AnswerQuestionPayload = {
 
 // SELECTORS
 
+const getQuestionById = (
+  { questions }: RootState,
+  questionId: string,
+): IQuestion | null => {
+  return questions[questionId] || null;
+};
+
 /**
  * Get question in list that wasn't answered yet
  */
@@ -60,6 +67,7 @@ const getQuizHasAnsweredQuestion = (
 export const QuestionsSelectors = {
   getCurrentQuestion: memoize(getCurrentQuestion),
   getQuizHasAnsweredQuestion: memoize(getQuizHasAnsweredQuestion),
+  getQuestionById: memoize(getQuestionById),
 };
 
 // SLICE
