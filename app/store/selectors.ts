@@ -1,3 +1,4 @@
 import { QuizzesSelectors } from './modules/quizzes';
+import { QuestionsSelectors } from './modules/questions';
 
-export { QuizzesSelectors };
+export { QuizzesSelectors, QuestionsSelectors };
