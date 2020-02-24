@@ -124,11 +124,7 @@ const initialState: IQuizzes = {
 const { actions, reducer } = createSlice({
   name: 'quizzes',
   initialState,
-  reducers: {
-    remove: (state, { payload }: PayloadAction<string>) => {
-      delete state.quizzesById[payload];
-    },
-  },
+  reducers: {},
   extraReducers: {
     [fetchQuizPending.type]: state => {
       state.isLoading = true;
