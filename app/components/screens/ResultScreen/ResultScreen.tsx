@@ -7,7 +7,7 @@ import { colors } from 'app/config/theme';
 import Answer from './components/Answer';
 import { FlatList } from 'react-native-gesture-handler';
 import { useTypedSelector } from 'app/hooks';
-import { QuizzesSelectors } from 'app/store/selectors';
+import { QuizzesSelectors, QuestionsSelectors } from 'app/store/selectors';
 
 type ResultScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -27,7 +27,9 @@ const ResultScreen = ({ navigation, route }: Props) => {
   const quiz = useTypedSelector(state =>
     QuizzesSelectors.getQuizById(state, quizId),
   );
-  console.log('TCL: ResultScreen -> quiz', quiz);
+  const correctIds = useTypedSelector(state =>
+    QuestionsSelectors.getCorrectAnswersIds(state, quizId),
+  );
 
   return (
     <Container>
@@ -38,7 +40,7 @@ const ResultScreen = ({ navigation, route }: Props) => {
         p="30px"
       >
         <Text size="big" bold>
-          You scored 3 of 10
+          You scored {correctIds.length} of {quiz.questionsIds.length}
         </Text>
         <FlatList
           data={quiz.questionsIds}

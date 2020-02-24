@@ -64,10 +64,24 @@ const getQuizHasAnsweredQuestion = (
   return questionsIds.some(id => questions[id].userAnswer);
 };
 
+const getCorrectAnswersIds = (
+  { questions, quizzes }: RootState,
+  quizId: string,
+): string[] => {
+  const questionsIds = quizzes.quizzesById[quizId].questionsIds;
+
+  return questionsIds.filter(id => {
+    const { correctAnswer, userAnswer } = questions[id];
+
+    return correctAnswer === userAnswer;
+  });
+};
+
 export const QuestionsSelectors = {
   getCurrentQuestion: memoize(getCurrentQuestion),
   getQuizHasAnsweredQuestion: memoize(getQuizHasAnsweredQuestion),
   getQuestionById: memoize(getQuestionById),
+  getCorrectAnswersIds: memoize(getCorrectAnswersIds),
 };
 
 // SLICE
