@@ -73,6 +73,9 @@ const QuizScreen = ({ navigation }: Props) => {
           value={questionIndex + 1}
           backgroundColor={colors.difficulty[question.difficulty]}
         />
+        <Text mt="10px" size="big">
+          {question.category}
+        </Text>
         <Text mt="10px">{question.text}</Text>
         <Flex mt="auto">
           <Button
