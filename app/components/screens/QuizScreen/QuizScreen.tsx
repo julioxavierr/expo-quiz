@@ -54,7 +54,9 @@ const QuizScreen = ({ navigation }: Props) => {
   if (!question || !quiz || isLoadingQuiz) {
     return (
       <Container>
-        <ActivityIndicator />
+        <Flex flex={1} centralize>
+          <ActivityIndicator />
+        </Flex>
       </Container>
     );
   }
