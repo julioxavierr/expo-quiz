@@ -43,7 +43,9 @@ const getCurrentQuestion = ({
   if (!currentQuizId) return null;
 
   const questionsIds = quizzes.quizzesById[currentQuizId].questionsIds;
-  const currentQuestionId = questionsIds.find(id => !questions[id].userAnswer);
+  const currentQuestionId = questionsIds.find(
+    id => questions[id].userAnswer === null,
+  );
 
   if (!currentQuestionId) return null;
 
@@ -61,7 +63,7 @@ const getQuizHasAnsweredQuestion = (
 
   const questionsIds = quizzes.quizzesById[quizId].questionsIds;
 
-  return questionsIds.some(id => questions[id].userAnswer);
+  return questionsIds.some(id => questions[id].userAnswer !== null);
 };
 
 const getCorrectAnswersIds = (
