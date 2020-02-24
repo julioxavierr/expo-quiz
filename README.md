@@ -2,11 +2,11 @@
 
 A trivia game made w/ React Native, Expo and modern Redux.
 
-## Project Kanban
+### Project Kanban
 
 Review public project kanban on [Trello](https://trello.com/b/9mg0ODCB/expo-quiz).
 
-## Folder structure
+### Folder structure
 
 ```
 ├── App.tsx – root component
@@ -31,27 +31,27 @@ Review public project kanban on [Trello](https://trello.com/b/9mg0ODCB/expo-quiz
     └── fonts
 ```
 
-# Getting Started
+### Getting Started
 
-### Installing
+#### Installing
 
 ```bash
 yarn install
 ```
 
-### Run App
+#### Run App
 
 ```bash
 yarn start
 ```
 
-### Test
+#### Test
 
 ```bash
 yarn test
 ```
 
-# Main References
+### Main References
 
 - **Redux Toolkit** - [Overview](https://redux.js.org/redux-toolkit/overview) and [Docs](https://redux-toolkit.js.org/)
 - [**Redux Style Guide**](https://redux.js.org/style-guide/style-guide)
