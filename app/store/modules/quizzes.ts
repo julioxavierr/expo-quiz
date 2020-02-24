@@ -48,9 +48,19 @@ const getQuizById = (state: RootState, id: string): IQuiz | null => {
   return state.quizzes.quizzesById[id];
 };
 
+const getAllCompletedQuizzesIds = (state: RootState): string[] => {
+  const { quizzesById } = state.quizzes;
+
+  const completedQuizzes = Object.keys(quizzesById).filter(
+    id => quizzesById[id].endDate,
+  );
+  return completedQuizzes;
+};
+
 export const QuizzesSelectors = {
   getCurrentQuiz: memoize(getCurrentQuiz),
   getQuizById: memoize(getQuizById),
+  getAllCompletedQuizzesIds: memoize(getAllCompletedQuizzesIds),
 };
 
 // ACTIONS
