@@ -1238,6 +1238,11 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/eslint-plugin/-/eslint-plugin-1.0.0.tgz#ae9a430f2c5795debca491f15a989fce86ea75a0"
   integrity sha512-GLhSN8dRt4lpixPQh+8prSCy6PYk/MT/mvji/ojAd5yshowDo6HFsimCSTD/uWAdjpUq91XK9tVdTNWfGRlKQA==
 
+"@react-native-community/hooks@2.4.3":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@react-native-community/hooks/-/hooks-2.4.3.tgz#101c61125504725aa194764f694dca5a20fd6c0a"
+  integrity sha512-CFx7UG8Jg70NBb0U4WPn634x/D+KnIwPWDO79Bne027S9K6UGT+RtV7ZuyE4knX5cVAvLtA+PVIchOHx+l56OA==
+
 "@react-native-community/masked-view@0.1.5":
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@react-native-community/masked-view/-/masked-view-0.1.5.tgz#25421be6cd943a4b1660b62cfbcd45be8891462c"

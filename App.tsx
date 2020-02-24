@@ -3,7 +3,11 @@ import React from 'react';
 import { StatusBar } from 'react-native';
 import { Provider } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import {
+  createStackNavigator,
+  StackNavigationOptions,
+} from '@react-navigation/stack';
+import { useBackHandler } from '@react-native-community/hooks';
 import { useResources } from 'app/hooks';
 import store from 'app/store';
 import { HomeScreen, QuizScreen, ResultScreen } from 'app/components/screens';
@@ -12,10 +16,12 @@ import { colors } from 'app/config/theme';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-const stackOptions = {
+const stackOptions: StackNavigationOptions = {
   title: null,
   headerTransparent: true,
   headerTintColor: colors.headerContent,
+  headerLeft: null,
+  gestureEnabled: false,
 };
 
 const MainStack = () => (
@@ -28,6 +34,11 @@ const MainStack = () => (
 
 export default function App() {
   const isLoadingResources = useResources();
+
+  // always disable default action of back button
+  useBackHandler(() => {
+    return true;
+  });
 
   if (isLoadingResources) return null;
 
