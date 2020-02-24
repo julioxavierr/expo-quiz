@@ -3,6 +3,9 @@ import styled from 'styled-components/native';
 import { border, BorderProps } from 'styled-system';
 import { colors } from 'app/config/theme';
 import { Text } from 'app/components/common';
+import { useTypedSelector } from 'app/hooks';
+import { QuestionsSelectors } from 'app/store/selectors';
+import texts from 'app/config/texts';
 
 const Card = styled.View<BorderProps>`
   background-color: ${colors.answer.backgroundColor};
@@ -13,12 +16,25 @@ const Card = styled.View<BorderProps>`
   ${border}
 `;
 
-const Answer = () => {
+type Props = {
+  questionId: string;
+};
+
+const Answer = ({ questionId }: Props) => {
+  const question = useTypedSelector(state =>
+    QuestionsSelectors.getQuestionById(state, questionId),
+  );
+  const correct = question.correctAnswer === question.userAnswer;
+
   return (
-    <Card borderLeftColor={colors.answer.right}>
-      <Text bold>Question text</Text>
+    <Card
+      borderLeftColor={correct ? colors.answer.correct : colors.answer.wrong}
+    >
+      <Text bold>{question.text}</Text>
       <Text color={colors.text.grayish} mt="5px">
-        True
+        {question.correctAnswer
+          ? texts.shared.options.true
+          : texts.shared.options.false}
       </Text>
     </Card>
   );

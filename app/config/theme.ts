@@ -18,7 +18,7 @@ const colors = {
   },
   answer: {
     backgroundColor: '#F3F6F8',
-    right: '#00A86B',
+    correct: '#00A86B',
     wrong: '#EE0C19',
   },
   card: {

@@ -2,6 +2,7 @@ import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
 import { sample, last } from 'lodash';
 import memoize from 'memoize-state';
 import shortid from 'shortid';
+import he from 'he';
 import api, { Difficulty, ResponseCode } from 'app/services/api';
 import texts from 'app/config/texts';
 import { RootState } from 'app/store';
@@ -31,7 +32,9 @@ interface IQuizzes {
 
 // SELECTORS
 
-const getCurrentQuiz = ({ quizzes }: Partial<RootState>): IQuiz | null => {
+const getCurrentQuiz = ({
+  quizzes,
+}: RootState | Partial<RootState>): IQuiz | null => {
   const { quizzesById } = quizzes;
 
   const lastQuizId = last(Object.keys(quizzesById));
@@ -41,11 +44,23 @@ const getCurrentQuiz = ({ quizzes }: Partial<RootState>): IQuiz | null => {
   return quizzesById[lastQuizId];
 };
 
-const getCurrentQuizMemoized = memoize(getCurrentQuiz);
+const getQuizById = (state: RootState, id: string): IQuiz | null => {
+  return state.quizzes.quizzesById[id];
+};
+
+const getAllCompletedQuizzesIds = (state: RootState): string[] => {
+  const { quizzesById } = state.quizzes;
+
+  const completedQuizzes = Object.keys(quizzesById).filter(
+    id => quizzesById[id].endDate,
+  );
+  return completedQuizzes;
+};
 
 export const QuizzesSelectors = {
-  getCurrentQuiz,
-  getCurrentQuizMemoized,
+  getCurrentQuiz: memoize(getCurrentQuiz),
+  getQuizById: memoize(getQuizById),
+  getAllCompletedQuizzesIds: memoize(getAllCompletedQuizzesIds),
 };
 
 // ACTIONS
@@ -54,14 +69,22 @@ export const QuizzesSelectors = {
 // see: https://github.com/reduxjs/redux-toolkit/issues/389
 const fetchQuizPending = createAction('quizzes/fetchQuiz/pending');
 const fetchQuizFulfilled = createAction<IQuiz>('quizzes/fetchQuiz/fulfilled');
-const fetchQuizRejected = createAction<Error>('quizzes/fetchQuiz/rejected');
+const fetchQuizRejected = createAction<string>('quizzes/fetchQuiz/rejected');
 
-const fetchQuiz = () => async dispatch => {
+/**
+ * Fetch quiz if needed
+ */
+const fetchQuiz = () => async (dispatch, getState) => {
+  // do not fetch quiz if there is one in progress
+  const current = getCurrentQuiz(getState());
+  if (current) return;
+
   dispatch(fetchQuizPending());
 
   // pick one difficulty randomly
   const difficulty = sample(Object.values(Difficulty));
   const params = {
+    difficulty,
     amount: QUESTIONS_AMOUNT,
     type: 'boolean',
   };
@@ -71,19 +94,20 @@ const fetchQuiz = () => async dispatch => {
   try {
     response = await api.get('', { params });
 
-    if (response?.response_code !== ResponseCode.Success) {
-      throw new Error(texts.shared.generalError);
+    if (response.data?.response_code !== ResponseCode.Success) {
+      dispatch(fetchQuizRejected(texts.shared.generalError));
+      return;
     }
   } catch (error) {
-    dispatch(fetchQuizRejected(error));
+    dispatch(fetchQuizRejected(error.toString()));
     return;
   }
 
   // create and dispatch questions
-  const questions = response.results.map(question => ({
+  const questions = response.data.results.map(question => ({
     id: shortid.generate(),
     difficulty: question.difficulty,
-    text: question.question,
+    text: he.decode(question.question),
     correctAnswer: question.correct_answer === 'True',
     userAnswer: null,
   }));
@@ -110,11 +134,7 @@ const initialState: IQuizzes = {
 const { actions, reducer } = createSlice({
   name: 'quizzes',
   initialState,
-  reducers: {
-    remove: (state, { payload }: PayloadAction<string>) => {
-      delete state.quizzesById[payload];
-    },
-  },
+  reducers: {},
   extraReducers: {
     [fetchQuizPending.type]: state => {
       state.isLoading = true;

@@ -2,6 +2,7 @@ import { default as reducer, QuizzesActions, IQuiz } from '../quizzes';
 import mockStore from 'app/test/utils/mockStore';
 import api, { Difficulty } from 'app/services/api';
 import mockApiResponse from './mockApiResponse.json';
+import texts from 'app/config/texts';
 
 jest.mock('app/services/api');
 
@@ -20,7 +21,13 @@ describe('fetchQuiz', () => {
     api.get.mockResolvedValueOnce(mockApiResponse);
     const action = QuizzesActions.fetchQuiz();
 
-    const store = mockStore({});
+    const store = mockStore({
+      quizzes: {
+        isLoading: false,
+        error: null,
+        quizzesById: {},
+      },
+    });
     return store.dispatch(action).then(() => {
       const [pending, addGroup, fulfilled] = store.getActions();
 
@@ -36,12 +43,18 @@ describe('fetchQuiz', () => {
   });
 
   it('should emit thunk lifecycle failure actions', async () => {
-    const message = 'Mock error in API';
-    api.get.mockRejectedValueOnce(new Error(message));
+    const error = new Error('Mock error in API');
+    api.get.mockRejectedValueOnce(error);
 
     const action = QuizzesActions.fetchQuiz();
 
-    const store = mockStore({});
+    const store = mockStore({
+      quizzes: {
+        isLoading: false,
+        error: null,
+        quizzesById: {},
+      },
+    });
     return store.dispatch(action).then(() => {
       const [pending, rejected] = store.getActions();
 
@@ -49,7 +62,7 @@ describe('fetchQuiz', () => {
       expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
       expect(rejected.type).toEqual('quizzes/fetchQuiz/rejected');
 
-      expect(rejected.payload.message).toEqual(message);
+      expect(rejected.payload).toEqual(error.toString());
     });
   });
 
@@ -57,7 +70,13 @@ describe('fetchQuiz', () => {
     api.get.mockResolvedValueOnce({ response_code: 2 });
     const action = QuizzesActions.fetchQuiz();
 
-    const store = mockStore({});
+    const store = mockStore({
+      quizzes: {
+        isLoading: false,
+        error: null,
+        quizzesById: {},
+      },
+    });
     return store.dispatch(action).then(() => {
       const [pending, rejected] = store.getActions();
 
@@ -65,7 +84,7 @@ describe('fetchQuiz', () => {
       expect(pending.type).toEqual('quizzes/fetchQuiz/pending');
       expect(rejected.type).toEqual('quizzes/fetchQuiz/rejected');
 
-      expect(rejected.payload.message).toEqual('An error ocurred.');
+      expect(rejected.payload).toEqual(texts.shared.generalError);
     });
   });
 
@@ -105,34 +124,6 @@ describe('fetchQuiz', () => {
       quizzesById: {
         [mockQuiz.id]: mockQuiz,
       },
-    };
-
-    expect(reducer(initialState, action)).toEqual(expectedState);
-  });
-});
-
-describe('quizzes/remove', () => {
-  it('should generate an action to remove a quiz', () => {
-    const action = QuizzesActions.remove(mockQuiz.id);
-
-    expect(action.type).toEqual('quizzes/remove');
-    expect(action.payload).toEqual(mockQuiz.id);
-  });
-
-  it('should remove a quiz from the store', () => {
-    const action = QuizzesActions.remove(mockQuiz.id);
-
-    const initialState = {
-      isLoading: false,
-      error: null,
-      quizzesById: {
-        [mockQuiz.id]: mockQuiz,
-      },
-    };
-
-    const expectedState = {
-      ...initialState,
-      quizzesById: {},
     };
 
     expect(reducer(initialState, action)).toEqual(expectedState);
