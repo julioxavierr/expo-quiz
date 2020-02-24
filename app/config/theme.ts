@@ -21,6 +21,10 @@ const colors = {
     right: '#00A86B',
     wrong: '#EE0C19',
   },
+  card: {
+    backgroundColor: '#FFF',
+    separator: '#74849A',
+  },
 };
 
 export { colors };
