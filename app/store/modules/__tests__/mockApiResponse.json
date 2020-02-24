@@ -1,13 +1,15 @@
 {
-  "response_code": 0,
-  "results": [
-    {
-      "category": "Entertainment: Video Games",
-      "type": "boolean",
-      "difficulty": "hard",
-      "question": "The retail disc of Tony Hawk&#039;s Pro Skater 5 only comes with the tutorial.",
-      "correct_answer": "True",
-      "incorrect_answers": ["False"]
-    }
-  ]
+  "data": {
+    "response_code": 0,
+    "results": [
+      {
+        "category": "Entertainment: Video Games",
+        "type": "boolean",
+        "difficulty": "hard",
+        "question": "The retail disc of Tony Hawk&#039;s Pro Skater 5 only comes with the tutorial.",
+        "correct_answer": "True",
+        "incorrect_answers": ["False"]
+      }
+    ]
+  }
 }
