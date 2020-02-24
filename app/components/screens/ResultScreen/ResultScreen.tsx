@@ -49,6 +49,7 @@ const ResultScreen = ({ navigation, route }: Props) => {
               <Answer questionId={item} />
             </Flex>
           )}
+          keyExtractor={item => item}
         />
         <Flex mt="auto">
           <Button

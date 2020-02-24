@@ -5,6 +5,7 @@ import { colors } from 'app/config/theme';
 import { Text } from 'app/components/common';
 import { useTypedSelector } from 'app/hooks';
 import { QuestionsSelectors } from 'app/store/selectors';
+import texts from 'app/config/texts';
 
 const Card = styled.View<BorderProps>`
   background-color: ${colors.answer.backgroundColor};
@@ -31,7 +32,9 @@ const Answer = ({ questionId }: Props) => {
     >
       <Text bold>{question.text}</Text>
       <Text color={colors.text.grayish} mt="5px">
-        {question.correctAnswer}
+        {question.correctAnswer
+          ? texts.shared.options.true
+          : texts.shared.options.false}
       </Text>
     </Card>
   );
