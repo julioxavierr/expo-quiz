@@ -4,7 +4,7 @@ import ROUTES, { RootStackParamList } from 'app/config/routes';
 import { Flex, Container, Text, Button } from 'app/components/common';
 import { colors } from 'app/config/theme';
 import texts from 'app/config/texts';
-import QuizFlatList from './components/QuizFlatList';
+import QuizList from './components/QuizList';
 import { useTypedSelector } from 'app/hooks';
 import { useDispatch } from 'react-redux';
 import { QuizzesSelectors, QuestionsSelectors } from 'app/store/selectors';
@@ -30,8 +30,8 @@ const HomeScreen = ({ navigation }: Props) => {
    * Pre-fetch next quiz
    */
   useEffect(() => {
-    dispatch(QuizzesActions.fetchQuiz());
-  }, [dispatch]);
+    if (!current) dispatch(QuizzesActions.fetchQuiz());
+  }, [dispatch, current]);
 
   return (
     <Container>
@@ -54,16 +54,7 @@ const HomeScreen = ({ navigation }: Props) => {
           </Button>
         </Flex>
         <Flex mt="auto">
-          <Text
-            bold
-            color={colors.text.white}
-            opacity={0.6}
-            mb="20px"
-            pl="36px"
-          >
-            {texts.home.scored}
-          </Text>
-          <QuizFlatList pl="36px" />
+          <QuizList pl="36px" />
         </Flex>
       </Flex>
     </Container>
