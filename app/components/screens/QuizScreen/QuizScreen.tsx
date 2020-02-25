@@ -99,8 +99,4 @@ const QuizScreen = ({ navigation }: Props) => {
   );
 };
 
-QuizScreen.navigationOptions = {
-  onPressBack: () => console.log('HEY'),
-};
-
 export default QuizScreen;
